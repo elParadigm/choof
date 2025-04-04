@@ -60,8 +60,12 @@ var (
 func (m model) Init() tea.Cmd { return nil }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if m.isFile == false && m.err == nil {
+		return m, tea.Quit
+	}
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+
 		if m.err != nil {
 			m.err = nil
 			return m, nil

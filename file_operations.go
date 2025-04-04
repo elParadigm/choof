@@ -5,14 +5,26 @@ import (
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
+func (m *model) checkFile() {
+	info, err := os.Stat(m.path)
+	if err != nil {
+		m.err = err
+		return
+	}
+	if !info.Mode().IsRegular() {
+		m.isFile = false
+		m.err = fmt.Errorf("the given path is not a regular file")
+	}
+}
 func (m *model) getStat(arg string) {
-	statCommand := exec.Command("stat", arg)
+	statCommand := exec.Command("stat", "--", arg)
 	var stdout, stderr bytes.Buffer
 	statCommand.Stdout = &stdout
 	statCommand.Stderr = &stderr
@@ -33,6 +45,15 @@ func (m *model) getStat(arg string) {
 	}
 
 	m.filename = filepath.Base(resultMatrix[0][1])
+
+	//check if the file name contain spaces and include all the parts
+	if len(resultMatrix[0]) > 2 {
+		for i, val := range resultMatrix[0] {
+			if i > 1 {
+				m.filename = m.filename + " " + val
+			}
+		}
+	}
 	m.created = resultMatrix[8][1]
 	m.permission = resultMatrix[3][1]
 	m.owner = resultMatrix[3][4]

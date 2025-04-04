@@ -20,6 +20,7 @@ type model struct {
 	height       int
 	path         string
 
+	isFile        bool
 	confirmDelete bool
 	showRename    bool
 	showDelete    bool
@@ -36,11 +37,12 @@ func main() {
 	args := os.Args[1:]
 
 	if len(args) == 0 {
-		fmt.Println("no arguments provided.")
+		fmt.Println("please provide a file name or a path to file.")
 		return
 	}
 
 	m := &model{
+		isFile:        true,
 		showDelete:    false,
 		confirmDelete: false,
 		confirmPrompt: false,
@@ -52,10 +54,17 @@ func main() {
 	m.getStat(args[0])
 	m.getFileType(args[0])
 	m.getPath(args[0])
+	m.checkFile()
+
+	if m.err != nil {
+		fmt.Printf("Error: %v\n", m.err)
+		os.Exit(0)
+	}
 	m.RenameInput.Focus()
 	p := tea.NewProgram(m)
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error:", err)
+
 		os.Exit(1)
 	}
 

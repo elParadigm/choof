@@ -6,10 +6,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/djherbis/times"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"syscall"
 )
 
 func (m *model) checkFile() {
@@ -24,41 +28,26 @@ func (m *model) checkFile() {
 	}
 }
 func (m *model) getStat(arg string) {
-	statCommand := exec.Command("stat", "--", arg)
-	var stdout, stderr bytes.Buffer
-	statCommand.Stdout = &stdout
-	statCommand.Stderr = &stderr
-
-	err := statCommand.Run()
-
+	fileInfo, err := os.Stat(arg)
 	if err != nil {
 		m.err = err
 	}
+	m.filename = fileInfo.Name()
 
-	result := stdout.String()
-	lines := strings.Split(result, "\n")
+	m.permission = fileInfo.Mode().String()
 
-	resultMatrix := make([][]string, len(lines))
+	m.Lastmodified = fileInfo.ModTime().String()
+	m.size = fileInfo.Size()
 
-	for i, l := range lines {
-		resultMatrix[i] = strings.Fields(l)
+	val := fileInfo.Sys().(*syscall.Stat_t)
+	usr, err := user.LookupId(strconv.Itoa(int(val.Uid)))
+	if err != nil {
+		m.err = err
 	}
+	m.owner = usr.Username
 
-	m.filename = filepath.Base(resultMatrix[0][1])
-
-	//check if the file name contain spaces and include all the parts
-	if len(resultMatrix[0]) > 2 {
-		for i, val := range resultMatrix[0] {
-			if i > 1 {
-				m.filename = m.filename + " " + val
-			}
-		}
-	}
-	m.created = resultMatrix[8][1]
-	m.permission = resultMatrix[3][1]
-	m.owner = resultMatrix[3][4]
-	m.Lastmodified = resultMatrix[6][1]
-	m.size = convertSize(resultMatrix[1][1])
+	creationTime, err := times.Stat(arg)
+	m.created = creationTime.BirthTime().Format("2006-01-02 15:04:05")
 
 }
 

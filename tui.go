@@ -168,10 +168,10 @@ func (m model) View() string {
 
 	fileInfo := leftBorderStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Left,
-			otherItemsStyle.Render("Size: "+m.size),
+			otherItemsStyle.Render("Size: "+convertSize(int(m.size))),
 			otherItemsStyle.Render("Last modified: "+m.Lastmodified),
 			otherItemsStyle.Render("Created: "+m.created),
-			otherItemsStyle.Render("Owner: "+m.owner[:len(m.owner)-1]),
+			otherItemsStyle.Render("Owner: "+m.owner),
 			otherItemsStyle.Render("Permission: "+m.permission),
 		),
 	)

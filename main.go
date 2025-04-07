@@ -10,7 +10,7 @@ import (
 
 type model struct {
 	filename     string
-	size         string
+	size         int64
 	created      string
 	Lastmodified string
 	permission   string

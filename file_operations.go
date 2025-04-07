@@ -36,7 +36,7 @@ func (m *model) getStat(arg string) {
 
 	m.permission = fileInfo.Mode().String()
 
-	m.Lastmodified = fileInfo.ModTime().String()
+	m.Lastmodified = fileInfo.ModTime().Format("2006-01-02 15:04:05")
 	m.size = fileInfo.Size()
 
 	val := fileInfo.Sys().(*syscall.Stat_t)

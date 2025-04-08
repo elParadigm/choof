@@ -18,7 +18,7 @@ Choof is a lightweight and intuitive CLI tool for viewing and managing file info
 ## Installation
 ```sh
 # Clone the repository
-git clone https://github.com/yourusername/choof.git
+git clone https://github.com/elParadigm/choof.git
 cd choof
 
 # Build and run

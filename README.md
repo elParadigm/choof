@@ -17,7 +17,7 @@ Choof is a lightweight and intuitive CLI tool for viewing and managing file info
   - `Ctrl + o` - Open file
   - `Ctrl + p` - Permission changer
   - `p` - Toggle permission explainer
-  - `p` - Toggle size
+  - `s` - Toggle size
 
 
 

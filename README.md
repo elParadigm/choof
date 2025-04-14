@@ -8,12 +8,19 @@ Choof is a lightweight and intuitive CLI tool for viewing and managing file info
 ## Features
 - **Detailed File Info:** Displays metadata such as size, creation/modification dates, permissions, and hashes (SHA256, MD5).
 - **File Operations:** Delete, rename, and open files with simple keybindings.
+- **A permission modification tool**
 - **User-Friendly Interface:** Clean, structured output with colors and icons.
 - **Keyboard Shortcuts:**
   - `Ctrl + c / q` - Close the program
   - `d` - Delete file (with confirmation)
   - `Ctrl + r` - Rename file
   - `Ctrl + o` - Open file
+  - `Ctrl + p` - Permission changer
+  - `p` - Toggle permission explainer
+  - `p` - Toggle size
+
+
+
 
 ## Installation
 ```sh

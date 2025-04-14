@@ -26,8 +26,8 @@ type model struct {
 	showDelete    bool
 	confirmPrompt bool
 	confirmRename bool
-
-	err error
+	showpChanger  bool
+	err           error
 
 	RenameInput textinput.Model
 }
@@ -48,6 +48,7 @@ func main() {
 		confirmPrompt: false,
 		showRename:    false,
 		confirmRename: false,
+		showpChanger:  false,
 		RenameInput:   textinput.New(),
 	}
 

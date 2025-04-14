@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
-	"path/filepath"
-
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"os/exec"
+	"path/filepath"
 )
 
 var (
@@ -55,6 +54,8 @@ var (
 		"/",
 		lipgloss.NewStyle().Foreground(lipgloss.Color("#1A1B26")).Background(lipgloss.Color("#2E7D32")).Render(" n "),
 		")")
+	togglePermission bool = false
+	toggleSize       bool = true
 )
 
 func (m model) Init() tea.Cmd { return nil }
@@ -94,7 +95,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "ctrl+o":
 			return m, tea.ExecProcess(exec.Command("xdg-open", m.path), func(err error) tea.Msg { return err })
-
+		case "ctrl+p":
+			RunPermissionEditor(m.path)
+			m.getStat(m.path)
+		case "s":
+			toggleSize = !toggleSize
+		case "p":
+			togglePermission = !togglePermission
 		case "y", "Y":
 			if m.showDelete && !m.showRename {
 				m.confirmDelete = true
@@ -128,7 +135,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-
 	}
 	if m.showRename {
 		if m.confirmRename {
@@ -164,15 +170,37 @@ func (m model) View() string {
 	if m.showRename {
 		return lipgloss.Place(m.width, 10, lipgloss.Left, lipgloss.Center, RenameConfirmation+"\n"+m.RenameInput.View(), lipgloss.WithWhitespaceChars(" "))
 	}
+	var permission string
+	if togglePermission {
+		permission = detailedPermission(m.permission)
+		permission += "\n"
+		permission += lipgloss.NewStyle().Faint(true).Render(" (p for less details)")
+	} else {
+		permission = "Permission: " + colorPermissions(m.permission)
+		permission += "\n"
+		permission += lipgloss.NewStyle().Faint(true).Render(" (p for more details)")
+
+	}
+
+	var size string
+	if toggleSize {
+		size = "Size: " + convertSizeBinary(int(m.size))
+		size += lipgloss.NewStyle().Faint(true).Render(" (s for Decimal)")
+	} else {
+		size = "Size: " + convertSizeDecimal(int(m.size))
+		size += lipgloss.NewStyle().Faint(true).Render(" (s for Binary)")
+
+	}
+
 	title := fileNameStyle.Render("File: " + m.filename)
 
 	fileInfo := leftBorderStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Left,
-			otherItemsStyle.Render("Size: "+convertSize(int(m.size))),
+			otherItemsStyle.Render(size),
 			otherItemsStyle.Render("Last modified: "+m.Lastmodified),
 			otherItemsStyle.Render("Created: "+m.created),
 			otherItemsStyle.Render("Owner: "+m.owner),
-			otherItemsStyle.Render("Permission: "+m.permission),
+			otherItemsStyle.Render(permission),
 		),
 	)
 
@@ -185,9 +213,9 @@ func (m model) View() string {
 
 	metadata := otherItemsStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Left,
-			"SHA256: "+m.calculateSHA256(m.path),
-			"MD5: "+m.calculateMD5(m.path),
-			"Path: "+m.path,
+			"SHA256:  "+lipgloss.NewStyle().Foreground(lipgloss.Color("#ff6f61")).Render(m.calculateSHA256(m.path)),
+			"MD5:     "+lipgloss.NewStyle().Foreground(lipgloss.Color("#ff5733")).Render(m.calculateMD5(m.path)),
+			"Path:    "+lipgloss.NewStyle().Foreground(lipgloss.Color("#d500f9")).Render(m.path),
 		),
 	)
 
@@ -196,7 +224,7 @@ func (m model) View() string {
 		Render(metadata)
 
 	controls := controlsStyle.Render(
-		"Ctrl+c/q - Close | d - Delete file | Ctrl+r - Rename file | Ctrl+o - Open file",
+		"Ctrl+c/q - Close | d - Delete file | Ctrl+r - Rename file | Ctrl+o - Open file\nCtrl+p - permission changer",
 	)
 	// Compose the main view
 	mainContent := lipgloss.JoinHorizontal(
